@@ -4,6 +4,7 @@ import { FormatResponse } from "../../utils/formatResponse";
 import { transactionModel, Transactions } from "./transactions.model";
 import { Request, Response } from "express";
 import usermodel, { User } from "../users/users.model";
+import { logs } from "../../utils/logger";
 
 const e = new CustomError();
 const f = new FormatResponse();
@@ -21,20 +22,64 @@ class transactionController {
 		try {
 			const transaction: Transactions = await transactionModel.create({
 				...req.body,
-				user: req.body.authenticatedUser,
+				user: req.params.id,
 			});
 
 			const user: any = await usermodel.findOne({
-				id: req.body.authenticatedUser,
+				id: req.body.id,
 			});
 
-			user.transactions.push(transaction._id);
-
-			await user.save();
+			// user.transactions.push(transaction._id);
 
 			f.sendResponse(res, 200, transaction);
 		} catch (error) {
-			e.clientError(res, e);
+			logs.error(error);
+			e.clientError(res, error);
+		}
+	}
+	async UpdateOne(req: Request, res: Response): Promise<void> {
+		try {
+			let transaction = await transactionModel.updateOne(
+				{ _id: req.params.id },
+				{ ...req.body },
+				{ new: true }
+			);
+			if (transaction) {
+				f.sendResponse(res, 200, { transaction, updated: true });
+			} else {
+				e.notfound(res, "record not found");
+			}
+		} catch (error) {
+			logs.error(error);
+			e.unprocessedEntity(res);
+		}
+	}
+	async DestroyOne(req: Request, res: Response): Promise<void> {
+		try {
+			const done = await crudControllers(transactionModel).removeOne(req);
+			logs.success(done);
+			if (done.deletedCount) {
+				f.sendResponse(res, 204, "deleted");
+			} else {
+				f.sendResponse(res, 404, "record not found");
+			}
+		} catch (error) {
+			console.log(error);
+			e.unprocessedEntity(error);
+		}
+	}
+
+	async getUserTransaction(req: Request, res: Response) {
+		try {
+			const data = await transactionModel
+				.find({ user: req.body.authenticatedUser.id })
+				.populate("user");
+			// .select("name email admin _id");
+
+			f.sendResponse(res, 200, data);
+		} catch (error) {
+			logs.error(error);
+			e.clientError(res, error);
 		}
 	}
 }

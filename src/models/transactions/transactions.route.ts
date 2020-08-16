@@ -1,13 +1,19 @@
 import { IRouter, Router } from "express";
-import { authenticate } from "../../utils/auth";
+import { authenticate, isAdmin } from "../../utils/auth";
 import transactionsController from "./transactions.controller";
-import transactionController from "./transactions.controller";
 
 const transactionsRoute: IRouter = Router();
 
-transactionsRoute.route("/").get(authenticate, transactionController.getMany);
+transactionsRoute
+	.route("/")
+	.get(authenticate, transactionsController.getUserTransaction);
+transactionsRoute
+	.route("/all")
+	.get(authenticate, isAdmin, transactionsController.getMany);
 transactionsRoute
 	.route("/:id")
-	.post(authenticate, transactionsController.createOne)
-	.patch()
-	.get();
+	.post(authenticate, isAdmin, transactionsController.createOne)
+	.patch(authenticate, isAdmin, transactionsController.UpdateOne)
+	.delete(authenticate, isAdmin, transactionsController.DestroyOne);
+
+export default transactionsRoute;

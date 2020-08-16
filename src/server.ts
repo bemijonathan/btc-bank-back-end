@@ -3,20 +3,23 @@ import morgan from "morgan";
 import bodyParser from "body-parser";
 import UserRoute from "./models/users/users.route";
 import { newPassword, resetPassword, signIn, signUp } from "./utils/authRoutes";
-// import * as morgan from 'morgan'
+import transactionsRoute from "./models/transactions/transactions.route";
 
 const app: express.Application = express();
-// app.use(morgan())
-const apiversion = "/api";
+
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
+
+/**
+ * Routes
+ *
+ */
 
 app.post("/signup", signUp);
 app.post("/signin", signIn);
 app.post("/reset", resetPassword);
 app.post("/password", newPassword);
 app.use(`/user`, UserRoute);
-
-// app.use(`${apiversion}/user`, )
+app.use("/transaction", transactionsRoute);
 
 export default app;

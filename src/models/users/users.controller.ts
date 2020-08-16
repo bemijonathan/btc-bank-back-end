@@ -6,6 +6,7 @@ import Users from "./users.model";
 import { Request, Response } from "express";
 import chalk from "chalk";
 import { logs } from "../../utils/logger";
+import { transactionModel } from "../transactions/transactions.model";
 
 const response = new FormatResponse();
 const errorResponse = new CustomError();
@@ -51,7 +52,11 @@ export class UserController {
 	async removeOne(req: Request, res: Response): Promise<void> {
 		try {
 			const done = await crudControllers(Users).removeOne(req);
-			if (done.deletedCount) {
+			const transaction = await transactionModel.deleteMany({
+				user: req.params.id,
+			});
+
+			if (done.deletedCount && transaction.deletedCount) {
 				response.sendResponse(res, 204, "deleted");
 			} else {
 				response.sendResponse(res, 404, "record not found");

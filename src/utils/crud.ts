@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Model } from "mongoose";
 import { logs } from "./logger";
 
-export const getOne = <T>(model: T) => async (req: Request): Promise<T> => {
+const getOne = <T>(model: T) => async (req: Request): Promise<T> => {
 	try {
 		const doc: T = await (model as any).findOne({ _id: req.params.id });
 		return doc;
@@ -12,7 +12,7 @@ export const getOne = <T>(model: T) => async (req: Request): Promise<T> => {
 	}
 };
 
-export const getMany = <T>(model: T) => async (req?: Request): Promise<T[]> => {
+const getMany = <T>(model: T) => async (req?: Request): Promise<T[]> => {
 	try {
 		const t = await (model as any).find({});
 		return t;
@@ -22,7 +22,7 @@ export const getMany = <T>(model: T) => async (req?: Request): Promise<T[]> => {
 	}
 };
 
-export const createOne = <T>(model: T) => async (req: Request): Promise<T> => {
+const createOne = <T>(model: T) => async (req: Request): Promise<T> => {
 	try {
 		const user = await (model as any).create({ ...req.body });
 		return user;
@@ -32,9 +32,7 @@ export const createOne = <T>(model: T) => async (req: Request): Promise<T> => {
 	}
 };
 
-export const updateOne = <T>(model: T) => async (
-	req: Request
-): Promise<T | void> => {
+const updateOne = <T>(model: T) => async (req: Request): Promise<T | void> => {
 	try {
 		return await (model as any).updateOne(
 			{
@@ -49,7 +47,7 @@ export const updateOne = <T>(model: T) => async (
 };
 
 //  to be edited
-export const removeOne = <T>(model: T) => async (req: Request) => {
+const removeOne = <T>(model: T) => async (req: Request) => {
 	try {
 		const removed = await (model as any).deleteOne({ _id: req.params.id });
 		return removed;

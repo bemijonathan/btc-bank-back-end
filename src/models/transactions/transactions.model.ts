@@ -4,7 +4,7 @@ import mongoose, { Document } from "mongoose";
 export interface Transactions extends Document {
 	transactionsType: String;
 	user: string;
-	amountBTC: number;
+	amount: number;
 	status: string;
 	wallet?: string;
 	readonly createdAt: Date;
@@ -16,13 +16,14 @@ const transactionSchema = new mongoose.Schema(
 		transactionsType: {
 			type: String,
 			enum: ["DEPOSIT", "WITHRAWAL"],
+			required: true,
 		},
 		user: {
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: "user",
 			required: "true",
 		},
-		amountBTC: {
+		amount: {
 			type: Number,
 			required: true,
 			min: 0.5,
@@ -33,7 +34,6 @@ const transactionSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			required: true,
 			enum: ["PENDING", "CONFIRMED", "FAILED"],
 			default: "PENDING",
 		},
