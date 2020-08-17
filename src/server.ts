@@ -4,9 +4,17 @@ import bodyParser from "body-parser";
 import UserRoute from "./models/users/users.route";
 import { newPassword, resetPassword, signIn, signUp } from "./utils/authRoutes";
 import transactionsRoute from "./models/transactions/transactions.route";
-
+import cors from "cors";
 const app: express.Application = express();
-
+app.use(
+	cors({
+		optionsSuccessStatus: 200,
+		origin: [
+			"http://localhost:3000/signup",
+			"https://cointelegraphbitcoin.com/",
+		],
+	})
+);
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
 
