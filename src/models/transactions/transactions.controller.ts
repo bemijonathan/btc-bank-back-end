@@ -3,7 +3,7 @@ import { CustomError } from "../../utils/error";
 import { FormatResponse } from "../../utils/formatResponse";
 import { transactionModel, Transactions } from "./transactions.model";
 import { Request, Response } from "express";
-import usermodel, { User } from "../users/users.model";
+// import usermodel, { User } from "../users/users.model";
 import { logs } from "../../utils/logger";
 
 const e = new CustomError();
@@ -25,9 +25,9 @@ class transactionController {
 				user: req.params.id,
 			});
 
-			const user: any = await usermodel.findOne({
-				id: req.body.id,
-			});
+			// const user: User | null = await usermodel.findOne({
+			// 	id: req.body.id,
+			// });
 
 			// user.transactions.push(transaction._id);
 
