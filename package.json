@@ -6,7 +6,8 @@
 	"scripts": {
 		"test": "jest",
 		"build": "tsc",
-		"start": "npm run build && node dist/src/index.js",
+		"prestart": "npm run build",
+		"start": "node dist/src/index.js",
 		"dev": "nodemon --exec npm run restart",
 		"restart": "rm -rf dist && npm run start"
 	},
