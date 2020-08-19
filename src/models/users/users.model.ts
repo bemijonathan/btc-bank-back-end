@@ -4,6 +4,9 @@ import { logs } from "../../utils/logger";
 
 export interface User extends Document {
 	name: string;
+	middleName: string;
+	phone: string;
+	country: string;
 	username: string;
 	profile: string;
 	email: string;
@@ -18,6 +21,18 @@ export interface User extends Document {
 
 const UsersSchema = new mongoose.Schema(
 	{
+		country: {
+			type: String,
+			required: true,
+		},
+		middleName: {
+			type: String,
+			required: true,
+		},
+		phone: {
+			type: String,
+			required: true,
+		},
 		about: {
 			type: String,
 			trim: true,
