@@ -6,7 +6,8 @@ const transactionsRoute: IRouter = Router();
 
 transactionsRoute
 	.route("/")
-	.get(authenticate, transactionsController.getUserTransaction);
+	.get(authenticate, transactionsController.getUserTransaction)
+	.post(authenticate, transactionsController.createWithdrawal);
 transactionsRoute
 	.route("/all")
 	.get(authenticate, isAdmin, transactionsController.getMany);

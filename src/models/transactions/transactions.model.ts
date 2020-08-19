@@ -2,10 +2,10 @@ import mongoose, { Document } from "mongoose";
 // import {}
 
 export interface Transactions extends Document {
-	transactionsType: String;
+	transactionsType: "DEPOSIT" | "WITHDRAWAL";
 	user: string;
 	amount: number;
-	status: string;
+	status: "PENDING" | "CONFIRMED" | "FAILED";
 	wallet?: string;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
@@ -15,7 +15,7 @@ const transactionSchema = new mongoose.Schema(
 	{
 		transactionsType: {
 			type: String,
-			enum: ["DEPOSIT", "WITHRAWAL"],
+			enum: ["DEPOSIT", "WITHDRAWAL"],
 			required: true,
 		},
 		user: {

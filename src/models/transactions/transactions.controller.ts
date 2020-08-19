@@ -10,12 +10,78 @@ const e = new CustomError();
 const f = new FormatResponse();
 
 class transactionController {
+	static async balanceDetails(
+		req: Request
+	): Promise<{ confirmed: number; deposit: number; withdraw: number }> {
+		let x: number = await transactionController.getBalance(req);
+		let totaldeposit: number = await (
+			await transactionController.getTotalDeposit(req)
+		).totaldeposit;
+		let totalwithdrawal: number = await (
+			await transactionController.getTotalDeposit(req)
+		).totalwithdrawal;
+
+		return { confirmed: x, deposit: totaldeposit, withdraw: totalwithdrawal };
+	}
+	static async getTotalDeposit(req: Request) {
+		let all: Transactions[] = await transactionModel.find({
+			user: req.body.authenticatedUser.id,
+		});
+		let totaldeposit: number = 0;
+		let totalwithdrawal: number = 0;
+		for (const transaction of all) {
+			if (transaction.transactionsType === "DEPOSIT") {
+				totaldeposit += transaction.amount;
+			} else if (transaction.transactionsType === "WITHDRAWAL") {
+				totalwithdrawal += transaction.amount;
+			}
+		}
+		return { totaldeposit, totalwithdrawal };
+	}
+	static async getBalance(req: Request): Promise<number> {
+		let all: Transactions[] = await transactionModel.find({
+			user: req.body.authenticatedUser.id,
+		});
+		let total: number = 0;
+		for (const transaction of all) {
+			if (
+				transaction.status === "CONFIRMED" &&
+				transaction.transactionsType === "DEPOSIT"
+			) {
+				total += transaction.amount;
+			} else if (
+				transaction.status === "CONFIRMED" &&
+				transaction.transactionsType === "WITHDRAWAL"
+			) {
+				total -= transaction.amount;
+			}
+		}
+		return total;
+	}
 	async getMany(req: Request, res: Response) {
 		try {
 			const t = await crudControllers(transactionModel).getMany();
 			f.sendResponse(res, 200, t);
 		} catch (error) {
 			e.unprocessedEntity(res);
+		}
+	}
+	async createWithdrawal(req: Request, res: Response) {
+		const balance: number = await transactionController.getBalance(req);
+		if (req.body.amount > balance || balance === 0) {
+			return e.unprocessedEntity(res, "insufficient coins");
+		} else {
+			try {
+				const t = await transactionModel.create({
+					...req.body,
+					transactionsType: "WITHDRAWAL",
+					user: req.body.authenticatedUser.id,
+				});
+				t ? f.sendResponse(res, 200, t) : e.unprocessedEntity(res);
+			} catch (error) {
+				logs.error(error);
+				e.unprocessedEntity(res, error);
+			}
 		}
 	}
 	async createOne(req: Request, res: Response) {

@@ -59,9 +59,9 @@ export const validatepassword = (
 	return bcrypt.compareSync(myPlaintextPassword, hash);
 };
 
-export const generateToken = (id: string) => {
+export const generateToken = (id: string, admin: boolean) => {
 	try {
-		return jwt.sign({ id }, "jona", {
+		return jwt.sign({ id, admin }, "jona", {
 			expiresIn: "24h",
 		});
 	} catch (error) {

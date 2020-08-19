@@ -13,7 +13,7 @@ let e = new CustomError();
 export const signUp = async (req: Request, res: Response) => {
 	try {
 		let user: User = await Users.create(req.body);
-		let token = generateToken(user.id);
+		let token = generateToken(user.id, user.admin);
 		console.log(user.password);
 		f.sendResponse(res, 201, { email: user.email, token });
 	} catch (error) {
@@ -34,13 +34,13 @@ export const signIn = async (req: Request, res: Response) => {
 		let user: User | null = await Users.findOne({ email: req.body.email });
 		if (user) {
 			if (validatepassword(password, user.password)) {
-				let token = generateToken(user.id);
+				let token = generateToken(user.id, user.admin);
 				f.sendResponse(res, 201, token);
 			} else {
 				e.clientError(res, "incorrect username or password");
 			}
 		} else {
-			e.notfound(res, "no  user associated with that account");
+			e.notfound(res, "incorrect username or passwords");
 		}
 	} catch (error) {
 		logs.error(error);

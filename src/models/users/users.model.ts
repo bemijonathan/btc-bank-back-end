@@ -18,6 +18,10 @@ export interface User extends Document {
 
 const UsersSchema = new mongoose.Schema(
 	{
+		about: {
+			type: String,
+			trim: true,
+		},
 		name: {
 			type: String,
 			required: true,
@@ -44,7 +48,7 @@ const UsersSchema = new mongoose.Schema(
 		},
 		admin: {
 			type: Boolean,
-			default: false,
+			default: true,
 		},
 		photos: {
 			type: String,
