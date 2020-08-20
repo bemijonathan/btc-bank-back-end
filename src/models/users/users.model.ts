@@ -9,6 +9,7 @@ export interface User extends Document {
 	country: string;
 	username: string;
 	profile: string;
+	about: string;
 	email: string;
 	password: string;
 	admin: boolean;
