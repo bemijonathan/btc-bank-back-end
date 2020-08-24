@@ -196,8 +196,8 @@ export class UserController {
 			const user: User = await Users.updateOne(
 				{
 					_id: req.body.authenticatedUser.id,
-					...req.body,
 				},
+				req.body,
 				{
 					new: true,
 				}
