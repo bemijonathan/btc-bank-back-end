@@ -6,30 +6,52 @@ import Users from "./users.model";
 import { Request, Response } from "express";
 import chalk from "chalk";
 import { logs } from "../../utils/logger";
+
 import {
 	transactionModel,
 	Transactions,
 } from "../transactions/transactions.model";
+import { Bonus, bonusModel } from "../bonus/bonus.model";
 
 const response = new FormatResponse();
 const errorResponse = new CustomError();
 
 export class UserController {
 	static async balanceDetails(
-		req: Request
-	): Promise<{ confirmed: number; deposit: number; withdraw: number }> {
-		let x: number = await UserController.getBalance(req);
-		let totaldeposit: number = await (await UserController.getTotalDeposit(req))
+		id: string
+	): Promise<{
+		confirmed: number;
+		deposit: number;
+		withdraw: number;
+		bonus: number;
+	}> {
+		let x: number = await UserController.getBalance(id);
+		let totaldeposit: number = await (await UserController.getTotalDeposit(id))
 			.totaldeposit;
 		let totalwithdrawal: number = await (
-			await UserController.getTotalDeposit(req)
+			await UserController.getTotalDeposit(id)
 		).totalwithdrawal;
+		let bonus: number = await UserController.getBonus(id);
 
-		return { confirmed: x, deposit: totaldeposit, withdraw: totalwithdrawal };
+		return {
+			confirmed: x,
+			deposit: totaldeposit,
+			withdraw: totalwithdrawal,
+			bonus,
+		};
 	}
-	static async getTotalDeposit(req: Request) {
+	static async getBonus(id: string) {
+		let b: Bonus | null = await bonusModel.findOne({ user: id });
+		if (b) {
+			return b?.amount;
+		} else {
+			let c: Bonus = await bonusModel.create({ user: id, amount: 0 });
+			return c?.amount;
+		}
+	}
+	static async getTotalDeposit(id: string) {
 		let all: Transactions[] = await transactionModel.find({
-			user: req.body.authenticatedUser.id,
+			user: id,
 		});
 		let totaldeposit: number = 0;
 		let totalwithdrawal: number = 0;
@@ -42,9 +64,9 @@ export class UserController {
 		}
 		return { totaldeposit, totalwithdrawal };
 	}
-	static async getBalance(req: Request): Promise<number> {
+	static async getBalance(id: string): Promise<number> {
 		let all: Transactions[] = await transactionModel.find({
-			user: req.body.authenticatedUser.id,
+			user: id,
 		});
 		let total: number = 0;
 		for (const transaction of all) {
@@ -85,7 +107,9 @@ export class UserController {
 				_id: req.body.authenticatedUser.id,
 			}).select("name email admin id about phone username middleName");
 
-			const balance = await UserController.balanceDetails(req);
+			const balance = await UserController.balanceDetails(
+				req.body.authenticatedUser._id
+			);
 
 			response.sendResponse(res, 200, {
 				transactions,
@@ -127,7 +151,7 @@ export class UserController {
 	async getAll(req: Request, res: Response): Promise<void> {
 		try {
 			const user: User[] = await Users.find({ admin: false }).select(
-				" username email id "
+				" username email id country"
 			);
 			response.sendResponse(res, 200, user);
 		} catch (e) {
@@ -155,9 +179,10 @@ export class UserController {
 	async getOne(req: Request, res: Response): Promise<void> {
 		try {
 			const user: User = await crudControllers(Users).getOne(req);
-			logs.warning(user);
+
 			if (user) {
-				response.sendResponse(res, 200, user);
+				const amounts = await UserController.balanceDetails(user._id);
+				response.sendResponse(res, 200, { ...user, ...amounts });
 			} else {
 				errorResponse.notfound(res);
 			}
@@ -167,7 +192,6 @@ export class UserController {
 		}
 	}
 	async updateUser(req: Request, res: Response): Promise<void> {
-		console.log(req.body);
 		try {
 			const user: User = await Users.updateOne(
 				{

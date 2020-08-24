@@ -14,7 +14,7 @@ export const signUp = async (req: Request, res: Response) => {
 	try {
 		let user: User = await Users.create(req.body);
 		let token = generateToken(user.id, user.admin);
-		console.log(user.password);
+
 		f.sendResponse(res, 201, { email: user.email, token });
 	} catch (error) {
 		if (error.name === "MongoError" && error.code === 11000) {
@@ -52,7 +52,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 	try {
 		const user = await Users.findOne({ email: req.body.email });
 		if (user) {
-			logs.success(user);
+			logs.success("user exists");
 		}
 		f.sendResponse(
 			res,

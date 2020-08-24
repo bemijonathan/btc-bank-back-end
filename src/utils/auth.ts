@@ -25,11 +25,11 @@ export const authenticate = async (
 		const token = verifyToken(tk as string);
 		if (token) {
 			const userId: any = jwt.decode(tk);
-			console.log(userId);
+
 			const user: any = await usersModel.findOne({ _id: userId.id });
 			if (user) {
 				req.body.authenticatedUser = user;
-				console.log(JSON.stringify(user.name));
+
 				next();
 			} else {
 				logs.warning("user not found");

@@ -4,7 +4,10 @@ import { logs } from "./logger";
 
 const getOne = <T>(model: T) => async (req: Request): Promise<T> => {
 	try {
-		const doc: T = await (model as any).findOne({ _id: req.params.id });
+		const doc: T = await (model as any)
+			.findOne({ _id: req.params.id })
+			.lean()
+			.exec();
 		return doc;
 	} catch (e) {
 		logs.error(e);
@@ -14,7 +17,7 @@ const getOne = <T>(model: T) => async (req: Request): Promise<T> => {
 
 const getMany = <T>(model: T) => async (req?: Request): Promise<T[]> => {
 	try {
-		const t = await (model as any).find({});
+		const t = await (model as any).find({}).lean().exec();
 		return t;
 	} catch (e) {
 		logs.error(e);
@@ -49,7 +52,10 @@ const updateOne = <T>(model: T) => async (req: Request): Promise<T | void> => {
 //  to be edited
 const removeOne = <T>(model: T) => async (req: Request) => {
 	try {
-		const removed = await (model as any).deleteOne({ _id: req.params.id });
+		const removed = await (model as any)
+			.deleteOne({ _id: req.params.id })
+			.lean()
+			.exec();
 		return removed;
 	} catch (e) {
 		logs.error(e);

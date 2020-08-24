@@ -90,7 +90,6 @@ UsersSchema.pre("save", function (next) {
 	const hash = hashedpassword((this as User).password);
 	user.password = hash;
 	user.username = user.name.split(" ").join("-");
-	logs.success(user.username);
 	next();
 });
 

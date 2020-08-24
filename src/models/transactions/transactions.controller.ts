@@ -5,6 +5,8 @@ import { transactionModel, Transactions } from "./transactions.model";
 import { Request, Response } from "express";
 // import usermodel, { User } from "../users/users.model";
 import { logs } from "../../utils/logger";
+import { isAdmin } from "../../utils/auth";
+import { Bonus, bonusModel } from "../bonus/bonus.model";
 
 const e = new CustomError();
 const f = new FormatResponse();
@@ -60,23 +62,61 @@ class transactionController {
 	}
 	async getMany(req: Request, res: Response) {
 		try {
-			const t = await crudControllers(transactionModel).getMany();
-			f.sendResponse(res, 200, t);
+			const t: any = await transactionModel
+				.find({})
+				.populate("user")
+				.lean()
+				.exec();
+			let data: any[] = [];
+
+			for (const i of t) {
+				data.push({
+					...i,
+					user: {
+						name: i.user?.name,
+						email: i.user?.email,
+						admin: i.user?.admin,
+						_id: i.user?._id,
+					},
+				});
+			}
+			f.sendResponse(res, 200, data);
 		} catch (error) {
 			e.unprocessedEntity(res);
 		}
 	}
 	async createWithdrawal(req: Request, res: Response) {
 		const balance: number = await transactionController.getBalance(req);
-		if (req.body.amount > balance || balance === 0) {
+		const bonus: Bonus | any = await bonusModel.findOne({
+			user: req.body.authenticatedUser.id,
+		});
+		if (req.body.amount > balance + bonus || balance === 0) {
 			return e.unprocessedEntity(res, "insufficient coins");
 		} else {
 			try {
 				const t = await transactionModel.create({
 					...req.body,
+					amount: Math.abs(bonus.amount - req.body.amount),
 					transactionsType: "WITHDRAWAL",
 					user: req.body.authenticatedUser.id,
 				});
+				if (bonus > req.body.amount) {
+					await bonusModel.updateOne(
+						{
+							user: req.body.authenticatedUser.id,
+							amount: bonus - req.body.amount,
+						},
+						{ new: true }
+					);
+				} else {
+					await bonusModel.updateOne(
+						{
+							user: req.body.authenticatedUser.id,
+							amount: 0,
+						},
+						{ new: true }
+					);
+				}
 				t ? f.sendResponse(res, 200, t) : e.unprocessedEntity(res);
 			} catch (error) {
 				logs.error(error);

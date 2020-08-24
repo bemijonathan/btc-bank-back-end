@@ -5,7 +5,7 @@ export class FormatResponse {
 	sendResponse<T>(res: Response, status: number, data: T): Response {
 		return res.status(status).send({
 			status: true,
-			data: this.serialize(data),
+			data: data,
 		});
 	}
 	serialize<T>(data: T): T {
