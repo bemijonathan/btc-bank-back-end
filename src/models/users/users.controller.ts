@@ -105,7 +105,7 @@ export class UserController {
 			});
 			const userdetails = await Users.findOne({
 				_id: req.body.authenticatedUser.id,
-			}).select("name email admin id about phone username middleName");
+			}).select("name email admin id about country phone username middleName");
 
 			const balance = await UserController.balanceDetails(
 				req.body.authenticatedUser._id
