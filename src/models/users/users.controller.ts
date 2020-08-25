@@ -223,7 +223,7 @@ export class UserController {
 					_id: req.params.id,
 					
 				},
-				...req.body,
+				req.body,
 				{ new: true }
 			);
 			if (user) {
