@@ -179,10 +179,12 @@ export class UserController {
 	async getOne(req: Request, res: Response): Promise<void> {
 		try {
 			const user: User = await crudControllers(Users).getOne(req);
+			const transactions = await transactionModel.find({user: req.params.id}).lean().exec()
 
 			if (user) {
 				const amounts = await UserController.balanceDetails(user._id);
-				response.sendResponse(res, 200, { ...user, ...amounts });
+				delete user.password
+				response.sendResponse(res, 200, { ...user, transactions, ...amounts });
 			} else {
 				errorResponse.notfound(res);
 			}
