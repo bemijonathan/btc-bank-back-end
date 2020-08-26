@@ -5,10 +5,14 @@ import UserRoute from "./models/users/users.route";
 import { newPassword, resetPassword, signIn, signUp } from "./utils/authRoutes";
 import transactionsRoute from "./models/transactions/transactions.route";
 import cors from "cors";
+import { cronJob } from "./cronjobs";
+
 const app: express.Application = express();
 app.use(cors());
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
+
+cronJob();
 
 /**
  * Routes

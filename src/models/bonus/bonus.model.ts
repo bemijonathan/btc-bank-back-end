@@ -26,6 +26,8 @@ const bonusSchema = new mongoose.Schema(
 	}
 );
 
+// bonusSchema.static("total",)
+
 export const bonusModel = mongoose.model<Bonus>("bonus", bonusSchema);
 
 // once a user is created a bonus account is created

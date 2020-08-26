@@ -15,6 +15,7 @@ export interface User extends Document {
 	admin: boolean;
 	photos: string;
 	transactions: [string];
+	total: number;
 	resetoken: string;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
@@ -29,6 +30,11 @@ const UsersSchema = new mongoose.Schema(
 		middleName: {
 			type: String,
 			required: true,
+		},
+		total: {
+			type: Number,
+			trim: true,
+			default: 0,
 		},
 		phone: {
 			type: String,

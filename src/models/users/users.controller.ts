@@ -1,7 +1,7 @@
 import { crudControllers } from "../../utils/crud";
 import { CustomError } from "../../utils/error";
 import { FormatResponse } from "../../utils/formatResponse";
-import { User } from "./users.model";
+import usermodel, { User } from "./users.model";
 import Users from "./users.model";
 import { Request, Response } from "express";
 import chalk from "chalk";
@@ -32,6 +32,8 @@ export class UserController {
 			await UserController.getTotalDeposit(id)
 		).totalwithdrawal;
 		let bonus: number = await UserController.getBonus(id);
+
+		// await usermodel.updateOne({ _id: id }, { total: x }, { new: true });
 
 		return {
 			confirmed: x,
@@ -178,12 +180,15 @@ export class UserController {
 	}
 	async getOne(req: Request, res: Response): Promise<void> {
 		try {
-			const user: User = await crudControllers(Users).getOne(req);
-			const transactions = await transactionModel.find({user: req.params.id}).lean().exec()
+			const user: any = await crudControllers(Users).getOne(req);
+			const transactions = await transactionModel
+				.find({ user: req.params.id })
+				.lean()
+				.exec();
 
 			if (user) {
 				const amounts = await UserController.balanceDetails(user._id);
-				delete user.password
+				delete user.password;
 				response.sendResponse(res, 200, { ...user, transactions, ...amounts });
 			} else {
 				errorResponse.notfound(res);
@@ -221,7 +226,6 @@ export class UserController {
 			const user: User = await Users.updateOne(
 				{
 					_id: req.params.id,
-					
 				},
 				req.body,
 				{ new: true }
