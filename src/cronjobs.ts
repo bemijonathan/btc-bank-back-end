@@ -9,7 +9,7 @@ import { UserController } from "./models/users/users.controller";
 // on withdrawal subtract first from the bonus before the actual money
 
 export const cronJob = () =>
-	cron.schedule("0 0 12 */2 * ? *", async () => {
+	cron.schedule("0 0 12 */2 * *", async () => {
 		let allUsers = [];
 		const docs: any = await bonusModel.find({}).populate("user").lean().exec();
 		for (const doc of docs) {
