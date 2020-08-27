@@ -51,10 +51,7 @@ class transactionController {
 				transaction.transactionsType === "DEPOSIT"
 			) {
 				total += transaction.amount;
-			} else if (
-				transaction.status === "CONFIRMED" &&
-				transaction.transactionsType === "WITHDRAWAL"
-			) {
+			} else if (transaction.transactionsType === "WITHDRAWAL") {
 				total -= transaction.amount;
 			}
 		}
@@ -90,13 +87,13 @@ class transactionController {
 		const bonus: Bonus | any = await bonusModel.findOne({
 			user: req.body.authenticatedUser.id,
 		});
-		if (req.body.amount > balance + bonus || balance === 0) {
+		if (+req.body.amount > balance + bonus || balance === 0) {
 			return e.unprocessedEntity(res, "insufficient coins");
 		} else {
 			try {
 				const t = await transactionModel.create({
 					...req.body,
-					amount: Math.abs(bonus.amount - req.body.amount),
+					amount: Math.abs(bonus.amount - +req.body.amount),
 					transactionsType: "WITHDRAWAL",
 					user: req.body.authenticatedUser.id,
 				});
@@ -104,7 +101,7 @@ class transactionController {
 					await bonusModel.updateOne(
 						{
 							user: req.body.authenticatedUser.id,
-							amount: bonus - req.body.amount,
+							amount: bonus - +req.body.amount,
 						},
 						{ new: true }
 					);

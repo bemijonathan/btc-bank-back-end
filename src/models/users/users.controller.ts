@@ -58,9 +58,15 @@ export class UserController {
 		let totaldeposit: number = 0;
 		let totalwithdrawal: number = 0;
 		for (const transaction of all) {
-			if (transaction.transactionsType === "DEPOSIT") {
+			if (
+				transaction.transactionsType === "DEPOSIT"
+				// transaction.status === "CONFIRMED"
+			) {
 				totaldeposit += transaction.amount;
-			} else if (transaction.transactionsType === "WITHDRAWAL") {
+			} else if (
+				transaction.transactionsType === "WITHDRAWAL"
+				// transaction.status === "CONFIRMED"
+			) {
 				totalwithdrawal += transaction.amount;
 			}
 		}
@@ -77,10 +83,7 @@ export class UserController {
 				transaction.transactionsType === "DEPOSIT"
 			) {
 				total += transaction.amount;
-			} else if (
-				transaction.status === "CONFIRMED" &&
-				transaction.transactionsType === "WITHDRAWAL"
-			) {
+			} else if (transaction.transactionsType === "WITHDRAWAL") {
 				total -= transaction.amount;
 			}
 		}
