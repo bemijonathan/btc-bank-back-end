@@ -83,42 +83,54 @@ class transactionController {
 		}
 	}
 	async createWithdrawal(req: Request, res: Response) {
-		const balance: number = await transactionController.getBalance(req);
+		const balance: number = (await transactionController.balanceDetails(req))
+			.confirmed;
 		const bonus: Bonus | any = await bonusModel.findOne({
 			user: req.body.authenticatedUser.id,
 		});
-		if (+req.body.amount > balance + bonus || balance === 0) {
+		if (+req.body.amount > balance + bonus.amount || balance === 0) {
 			return e.unprocessedEntity(res, "insufficient coins");
-		} else {
+		} else if (req.body.amount > 0) {
 			try {
-				const t = await transactionModel.create({
-					...req.body,
-					amount: Math.abs(bonus.amount - +req.body.amount),
-					transactionsType: "WITHDRAWAL",
-					user: req.body.authenticatedUser.id,
-				});
-				if (bonus > req.body.amount) {
+				let t;
+				if (bonus.amount > req.body.amount) {
+					t = await transactionModel.create({
+						...req.body,
+						amount: req.body.amount,
+						transactionsType: "WITHDRAWAL",
+						user: req.body.authenticatedUser.id,
+					});
 					await bonusModel.updateOne(
 						{
 							user: req.body.authenticatedUser.id,
-							amount: bonus - +req.body.amount,
 						},
+						{ amount: bonus.amount - req.body.amount },
 						{ new: true }
 					);
-				} else {
+				} else if (balance + bonus.amount > req.body.amount) {
+					t = await transactionModel.create({
+						...req.body,
+						amount: req.body.amount,
+						transactionsType: "WITHDRAWAL",
+						user: req.body.authenticatedUser.id,
+					});
 					await bonusModel.updateOne(
 						{
 							user: req.body.authenticatedUser.id,
-							amount: 0,
 						},
+						{ amount: 0 },
 						{ new: true }
 					);
 				}
+
+				console.log(t);
 				t ? f.sendResponse(res, 200, t) : e.unprocessedEntity(res);
 			} catch (error) {
 				logs.error(error);
 				e.unprocessedEntity(res, error);
 			}
+		} else {
+			return e.unprocessedEntity(res, "insufficient coins");
 		}
 	}
 	async createOne(req: Request, res: Response) {
@@ -127,13 +139,6 @@ class transactionController {
 				...req.body,
 				user: req.params.id,
 			});
-
-			// const user: User | null = await usermodel.findOne({
-			// 	id: req.body.id,
-			// });
-
-			// user.transactions.push(transaction._id);
-
 			f.sendResponse(res, 200, transaction);
 		} catch (error) {
 			logs.error(error);

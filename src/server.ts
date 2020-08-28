@@ -6,6 +6,7 @@ import { newPassword, resetPassword, signIn, signUp } from "./utils/authRoutes";
 import transactionsRoute from "./models/transactions/transactions.route";
 import cors from "cors";
 import { cronJob } from "./cronjobs";
+import { transactionModel } from "./models/transactions/transactions.model";
 
 const app: express.Application = express();
 app.use(cors());
@@ -14,10 +15,9 @@ app.use(bodyParser.json());
 
 cronJob();
 
-/**
- * Routes
- *
- */
+// transactionModel.deleteMany({}).then((data) => {
+// 	console.log("done");
+// });
 
 app.post("/signup", signUp);
 app.post("/signin", signIn);

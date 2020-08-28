@@ -26,7 +26,7 @@ const transactionSchema = new mongoose.Schema(
 		amount: {
 			type: Number,
 			required: true,
-			min: 0.5,
+			min: 0,
 		},
 		wallet: {
 			type: String,
